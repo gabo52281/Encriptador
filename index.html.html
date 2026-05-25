@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Encriptación - Cifrado César</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 35px;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2.2rem;
+    }
+
+    .subtitulo {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 1rem;
+      resize: vertical;
+      outline: none;
+      margin-bottom: 10px;
+      background: rgba(255,255,255,0.95);
+    }
+
+    .contador {
+      text-align: right;
+      margin-bottom: 20px;
+      color: #cbd5e1;
+      font-size: 0.9rem;
+    }
+
+    .botones {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+
+    button {
+      flex: 1;
+      min-width: 180px;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .encriptar {
+      background: #22c55e;
+      color: white;
+    }
+
+    .encriptar:hover {
+      background: #16a34a;
+      transform: translateY(-2px);
+    }
+
+    .desencriptar {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .desencriptar:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
+
+    .resultado {
+      background: rgba(255,255,255,0.12);
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 15px;
+    }
+
+    .resultado h2 {
+      margin-bottom: 15px;
+      color: #f8fafc;
+    }
+
+    #salida {
+      word-wrap: break-word;
+      line-height: 1.6;
+      color: #e2e8f0;
+      min-height: 50px;
+    }
+
+    .error {
+      color: #fecaca;
+      background: rgba(239,68,68,0.2);
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .info {
+      margin-top: 25px;
+      color: #cbd5e1;
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .botones {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <h1>🔐 Sistema de Encriptación</h1>
+
+    <p class="subtitulo">
+      Aplicación desarrollada con el algoritmo de Cifrado César.<br>
+      Permite encriptar y desencriptar mensajes de hasta 150 caracteres.
+    </p>
+
+    <div id="error" class="error"></div>
+
+    <label for="mensaje">Ingrese el mensaje:</label>
+
+    <textarea
+      id="mensaje"
+      maxlength="150"
+      placeholder="Escriba aquí su mensaje..."
+    ></textarea>
+
+    <div class="contador">
+      <span id="contador">0</span>/150 caracteres
+    </div>
+
+    <div class="botones">
+      <button class="encriptar" onclick="encriptarMensaje()">
+        Encriptar Mensaje
+      </button>
+
+      <button class="desencriptar" onclick="desencriptarMensaje()">
+        Desencriptar Mensaje
+      </button>
+    </div>
+
+    <div class="resultado">
+      <h2>Resultado</h2>
+      <div id="salida">
+        El resultado aparecerá aquí...
+      </div>
+    </div>
+
+    <div class="info">
+      <strong>Algoritmo utilizado:</strong> Cifrado César con desplazamiento de 3 posiciones.
+    </div>
+
+  </div>
+
+  <script>
+
+    const textarea = document.getElementById('mensaje');
+    const contador = document.getElementById('contador');
+
+    textarea.addEventListener('input', () => {
+      contador.textContent = textarea.value.length;
+    });
+
+    function mostrarError(mensaje) {
+      const error = document.getElementById('error');
+      error.style.display = 'block';
+      error.textContent = mensaje;
+    }
+
+    function ocultarError() {
+      const error = document.getElementById('error');
+      error.style.display = 'none';
+    }
+
+    function cifradoCesar(texto, desplazamiento) {
+      let resultado = '';
+
+      for (let i = 0; i < texto.length; i++) {
+        let caracter = texto[i];
+
+        if (caracter.match(/[a-z]/i)) {
+          let codigo = texto.charCodeAt(i);
+
+          if (codigo >= 65 && codigo <= 90) {
+            caracter = String.fromCharCode(((codigo - 65 + desplazamiento + 26) % 26) + 65);
+          }
+
+          else if (codigo >= 97 && codigo <= 122) {
+            caracter = String.fromCharCode(((codigo - 97 + desplazamiento + 26) % 26) + 97);
+          }
+        }
+
+        resultado += caracter;
+      }
+
+      return resultado;
+    }
+
+    function validarMensaje(texto) {
+
+      if (texto.trim() === '') {
+        mostrarError('Debe ingresar un mensaje.');
+        return false;
+      }
+
+      if (texto.length > 150) {
+        mostrarError('El mensaje supera el límite de 150 caracteres.');
+        return false;
+      }
+
+      ocultarError();
+      return true;
+    }
+
+    function encriptarMensaje() {
+      const mensaje = textarea.value;
+
+      if (!validarMensaje(mensaje)) {
+        return;
+      }
+
+      const resultado = cifradoCesar(mensaje, 3);
+
+      document.getElementById('salida').innerHTML = `
+        <strong>Mensaje Encriptado:</strong><br><br>
+        ${resultado}
+      `;
+    }
+
+    function desencriptarMensaje() {
+      const mensaje = textarea.value;
+
+      if (!validarMensaje(mensaje)) {
+        return;
+      }
+
+      const resultado = cifradoCesar(mensaje, -3);
+
+      document.getElementById('salida').innerHTML = `
+        <strong>Mensaje Desencriptado:</strong><br><br>
+        ${resultado}
+      `;
+    }
+
+  </script>
+
+</body>
+</html>
